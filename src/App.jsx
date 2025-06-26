@@ -298,18 +298,24 @@ function App() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-pink-500 text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Melita Bakes</h1>
+       <div className="container mx-auto flex justify-between items-center">
+         <h1 className="text-2xl font-bold">Melita Bakes</h1>
           <nav>
-            <ul className="flex space-x-4">
-              <li><a href="#home" className="hover:underline">Home</a></li>
-              <li><a href="#about" className="hover:underline">About</a></li>
-              <li><a href="#contact" className="hover:underline">Contact</a></li>
-              {!isAdminLoggedIn && <li><a href="/admin" className="hover:underline">Admin</a></li>}
-            </ul>
-          </nav>
-        </div>
-      </header>
+           <ul className="flex space-x-4">
+              <li><button onClick={() => setCurrentView('home')} className="hover:underline">Home</but
+ton></li>
+              <li><button onClick={() => setCurrentView('home#about')} className="hover:underline">Abo
+ut</button></li>
+             <li><button onClick={() => setCurrentView('home#contact')} className="hover:underline">C
+ontact</button></li>
+            {!isAdminLoggedIn && (
+              <li><button onClick={() => setCurrentView('admin-login')} className="hover:underline">
+Admin</button></li>
+        )}
+      </ul>
+    </nav>
+  </div>
+</header>
 
       {/* Main content */}
       <main className="container mx-auto p-4">
