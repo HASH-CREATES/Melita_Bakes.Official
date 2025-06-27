@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './App.css'; // Will include the slide-rotate-hor-b-fwd animation
-
-// Import Supabase client
+import './App.css';
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 
@@ -33,17 +31,14 @@ function App() {
 
   // Load data from Supabase
   useEffect(() => {
-  // Always load these (public data)
-  loadCakes();
-  loadHours();
-  loadTestimonials();
-  loadContactInfo();
-
-  // Only load users if admin is logged in
-  if (isAdminLoggedIn) {
-    loadUsers();
-  }
-}, [isAdminLoggedIn]); // Only re-run when login changes
+    loadCakes();
+    loadHours();
+    loadTestimonials();
+    loadContactInfo();
+    if (isAdminLoggedIn) {
+      loadUsers();
+    }
+  }, [isAdminLoggedIn]);
 
   // Load cakes
   const loadCakes = async () => {
@@ -81,47 +76,38 @@ function App() {
   };
 
   // Admin login
-   const handleAdminLogin = async () => {
-  try {
-    // 1. Validate inputs
-    if (!adminEmail || !adminPassword) {
-      alert('Please enter both email and password');
-      return;
+  const handleAdminLogin = async () => {
+    try {
+      if (!adminEmail || !adminPassword) {
+        alert('Please enter both email and password');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('email', adminEmail)
+        .eq('password', adminPassword)
+        .single();
+
+      if (error || !data) {
+        alert('Invalid credentials. Please try again.');
+        console.error('Login error:', error);
+        return;
+      }
+
+      setIsAdminLoggedIn(true);
+      setCurrentView('dashboard');
+      navigate('/dashboard');
+      window.scrollTo(0, 0);
+      loadUsers();
+      loadCakes();
+      setAdminPassword('');
+    } catch (err) {
+      console.error('Login failed:', err);
+      alert('Login failed. Please try again later.');
     }
-
-    // 2. Check admin credentials in Supabase
-    const { data, error } = await supabase
-      .from('admins')
-      .select('*')
-      .eq('email', adminEmail)
-      .eq('password', adminPassword)
-      .single();
-
-    // 3. Handle errors
-    if (error || !data) {
-      alert('Invalid credentials. Please try again.');
-      console.error('Login error:', error);
-      return;
-    }
-
-    // 4. Successful login actions
-    setIsAdminLoggedIn(true);
-    setCurrentView('dashboard');
-    navigate('/dashboard');  // Programmatic navigation
-    window.scrollTo(0, 0);   // Scroll to top
-
-    // 5. Load admin-specific data
-    loadUsers();
-    loadCakes(); // Refresh data
-    
-    // 6. Clear password field (security best practice)
-    setAdminPassword('');
-
-  } catch (err) {
-    console.error('Login failed:', err);
-    alert('Login failed. Please try again later.');
-  }
-};
+  };
 
   // Add cake
   const addCake = async () => {
@@ -325,70 +311,71 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-neutral-900 text-gray-100">
       {/* Header */}
-       <header className="bg-pink-500 text-white p-4 shadow-md">
-  <div className="container mx-auto flex justify-between items-center">
-    <h1 className="text-2xl font-bold cursor-pointer" onClick={() => {
-      setCurrentView('home');
-      window.scrollTo(0, 0); // Scroll to top when clicking logo
-    }}>Melita Bakes</h1>
-    <nav>
-      <ul className="flex space-x-4">
-        <li>
-          <button 
-            onClick={() => {
-              setCurrentView('home');
-              document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
-          >
-            Home
-          </button>
-        </li>
-        <li>
-          <button 
-            onClick={() => {
-              setCurrentView('home');
-              setTimeout(() => { // Small delay for state update
-                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-              }, 50);
-            }}
-            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
-          >
-            About
-          </button>
-        </li>
-        <li>
-          <button 
-            onClick={() => {
-              setCurrentView('home');
-              setTimeout(() => {
-                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-              }, 50);
-            }}
-            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
-          >
-            Contact
-          </button>
-        </li>
-        {!isAdminLoggedIn && (
-          <li>
-            <button 
-              onClick={() => {
-                setCurrentView('admin-login');
-                window.scrollTo(0, 0);
-              }}
-              className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
-            >
-              Admin
-            </button>
-          </li>
-        )}
-      </ul>
-    </nav>
-  </div>
-</header>
+      <header className="bg-pink-500 text-white p-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold cursor-pointer" onClick={() => {
+            setCurrentView('home');
+            window.scrollTo(0, 0);
+          }}>Melita Bakes</h1>
+          <nav>
+            <ul className="flex space-x-4">
+              <li>
+                <button 
+                  onClick={() => {
+                    setCurrentView('home');
+                    document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+                >
+                  Home
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    setCurrentView('home');
+                    setTimeout(() => {
+                      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 50);
+                  }}
+                  className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+                >
+                  About
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => {
+                    setCurrentView('home');
+                    setTimeout(() => {
+                      document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 50);
+                  }}
+                  className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+                >
+                  Contact
+                </button>
+              </li>
+              {!isAdminLoggedIn && (
+                <li>
+                  <button 
+                    onClick={() => {
+                      setCurrentView('admin-login');
+                      window.scrollTo(0, 0);
+                    }}
+                    className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+                  >
+                    Admin
+                  </button>
+                </li>
+              )}
+            </ul>
+          </nav>
+        </div>
+      </header>
+
       {/* Main content */}
       <main className="container mx-auto p-4">
         {currentView === 'home' && (
@@ -397,7 +384,7 @@ function App() {
             <section id="home" className="py-12 text-center">
               <h2 className="text-4xl font-bold mb-4">Delicious Cakes by Melita</h2>
               <p className="text-xl max-w-2xl mx-auto mb-8">Crafting beautiful and tasty cakes since 2023.</p>
-              <img src="https://placehold.co/600x400"  alt="Melita Bakes" className="mx-auto rounded-lg shadow-lg" />
+              <img src="https://placehold.co/600x400" alt="Melita Bakes" className="mx-auto rounded-lg shadow-lg" />
             </section>
 
             {/* Cake Carousel */}
@@ -406,7 +393,7 @@ function App() {
               <div className="overflow-x-scroll pb-4 hide-scrollbar">
                 <div className="flex space-x-4">
                   {cakes.map((cake) => (
-                    <div key={cake.id} className="w-64 h-96 bg-gray-100 rounded-lg overflow-hidden shadow-md">
+                    <div key={cake.id} className="w-64 h-96 bg-neutral-800 rounded-lg overflow-hidden shadow-md">
                       <div className="relative w-full h-64">
                         <img 
                           src={cake.image_url} 
@@ -416,8 +403,8 @@ function App() {
                       </div>
                       <div className="p-4">
                         <h4 className="font-bold text-lg">{cake.name}</h4>
-                        <p className="text-gray-700">${cake.price}</p>
-                        <p className="text-sm text-gray-600 mt-2">{cake.description}</p>
+                        <p className="text-gray-300">${cake.price}</p>
+                        <p className="text-sm text-gray-400 mt-2">{cake.description}</p>
                       </div>
                     </div>
                   ))}
@@ -430,9 +417,9 @@ function App() {
               <h3 className="text-2xl font-bold mb-6 text-center">What Our Customers Say</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {testimonials.map((testimonial) => (
-                  <div key={testimonial.id} className="bg-gray-100 p-6 rounded-lg shadow-md">
-                    <p className="italic mb-4">"{testimonial.comment}"</p>
-                    <p className="font-semibold">{testimonial.name}</p>
+                  <div key={testimonial.id} className="bg-neutral-800 p-6 rounded-lg shadow-md">
+                    <p className="italic mb-4 text-gray-300">"{testimonial.comment}"</p>
+                    <p className="font-semibold text-gray-100">{testimonial.name}</p>
                   </div>
                 ))}
               </div>
@@ -443,9 +430,9 @@ function App() {
               <h3 className="text-2xl font-bold mb-6 text-center">Business Hours</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {hours.map((hour) => (
-                  <div key={hour.id} className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                    <h4 className="font-bold text-lg">{hour.day}</h4>
-                    <p>{hour.hours}</p>
+                  <div key={hour.id} className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
+                    <h4 className="font-bold text-lg text-gray-100">{hour.day}</h4>
+                    <p className="text-gray-300">{hour.hours}</p>
                   </div>
                 ))}
               </div>
@@ -454,10 +441,10 @@ function App() {
             {/* Contact Info */}
             <section id="contact" className="py-12">
               <h3 className="text-2xl font-bold mb-6 text-center">Contact Us</h3>
-              <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
-                <p className="mb-2"><strong>Phone:</strong> {contactInfo?.phone || 'N/A'}</p>
-                <p className="mb-2"><strong>Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer">@{contactInfo?.instagram || 'N/A'}</a></p>
-                <p><strong>Address:</strong> {contactInfo?.address || 'N/A'}</p>
+              <div className="max-w-2xl mx-auto bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
+                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Phone:</strong> {contactInfo?.phone || 'N/A'}</p>
+                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">@{contactInfo?.instagram || 'N/A'}</a></p>
+                <p className="text-gray-300"><strong className="text-gray-100">Address:</strong> {contactInfo?.address || 'N/A'}</p>
               </div>
             </section>
           </>
@@ -466,10 +453,10 @@ function App() {
         {currentView === 'admin-login' && (
           <section className="py-12">
             <h2 className="text-3xl font-bold mb-6 text-center">Admin Login</h2>
-            <div className="max-w-md mx-auto bg-white p-6 rounded-lg shadow-md border border-gray-200">
+            <div className="max-w-md mx-auto bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
               <form onSubmit={(e) => { e.preventDefault(); handleAdminLogin(); }}>
                 <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                  <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="email">
                     Email
                   </label>
                   <input 
@@ -477,12 +464,12 @@ function App() {
                     id="email" 
                     value={adminEmail} 
                     onChange={(e) => setAdminEmail(e.target.value)} 
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                    className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                     required 
                   />
                 </div>
                 <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+                  <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="password">
                     Password
                   </label>
                   <input 
@@ -490,7 +477,7 @@ function App() {
                     id="password" 
                     value={adminPassword} 
                     onChange={(e) => setAdminPassword(e.target.value)} 
-                    className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                    className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                     required 
                   />
                 </div>
@@ -512,13 +499,13 @@ function App() {
             {/* Manage Cakes */}
             <section>
               <h3 className="text-2xl font-bold mb-4">Manage Cakes</h3>
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-bold mb-2">Add New Cake</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Add New Cake</h4>
                     <form onSubmit={(e) => { e.preventDefault(); editingCakeId ? editCake() : addCake(); }}>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="name">
                           Name
                         </label>
                         <input 
@@ -526,12 +513,12 @@ function App() {
                           id="name" 
                           value={newCake.name} 
                           onChange={(e) => setNewCake({...newCake, name: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           required 
                         />
                       </div>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="price">
                           Price
                         </label>
                         <input 
@@ -539,25 +526,25 @@ function App() {
                           id="price" 
                           value={newCake.price} 
                           onChange={(e) => setNewCake({...newCake, price: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           required 
                         />
                       </div>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="description">
                           Description
                         </label>
                         <textarea 
                           id="description" 
                           value={newCake.description} 
                           onChange={(e) => setNewCake({...newCake, description: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           rows="3" 
                           required 
                         ></textarea>
                       </div>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="image">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="image">
                           Image
                         </label>
                         <input 
@@ -565,7 +552,7 @@ function App() {
                           id="image" 
                           accept="image/*" 
                           onChange={(e) => setCakeImageFile(e.target.files[0])} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                         />
                       </div>
                       <button 
@@ -577,21 +564,21 @@ function App() {
                     </form>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-2">Current Cakes</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Current Cakes</h4>
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-neutral-700">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Price</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-neutral-800 divide-y divide-gray-700">
                           {cakes.map((cake) => (
-                            <tr key={cake.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">{cake.name}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">${cake.price}</td>
+                            <tr key={cake.id} className="hover:bg-neutral-700">
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">{cake.name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">${cake.price}</td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <button 
                                   onClick={() => {
@@ -603,13 +590,13 @@ function App() {
                                       image_url: cake.image_url
                                     });
                                   }} 
-                                  className="text-blue-600 hover:text-blue-900 mr-4"
+                                  className="text-blue-400 hover:text-blue-300 mr-4"
                                 >
                                   Edit
                                 </button>
                                 <button 
                                   onClick={() => deleteCake(cake.id)} 
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-400 hover:text-red-300"
                                 >
                                   Delete
                                 </button>
@@ -627,13 +614,13 @@ function App() {
             {/* Manage Business Hours */}
             <section>
               <h3 className="text-2xl font-bold mb-4">Manage Business Hours</h3>
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-bold mb-2">Add New Hour</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Add New Hour</h4>
                     <form onSubmit={(e) => { e.preventDefault(); addBusinessHour(); }}>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="day">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="day">
                           Day
                         </label>
                         <input 
@@ -641,12 +628,12 @@ function App() {
                           id="day" 
                           value={newHour.day} 
                           onChange={(e) => setNewHour({...newHour, day: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           required 
                         />
                       </div>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="hours">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="hours">
                           Hours
                         </label>
                         <input 
@@ -654,7 +641,7 @@ function App() {
                           id="hours" 
                           value={newHour.hours} 
                           onChange={(e) => setNewHour({...newHour, hours: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           required 
                         />
                       </div>
@@ -667,34 +654,34 @@ function App() {
                     </form>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-2">Current Hours</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Current Hours</h4>
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-neutral-700">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Day</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hours</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Day</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Hours</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-neutral-800 divide-y divide-gray-700">
                           {hours.map((hour) => (
-                            <tr key={hour.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">{hour.day}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">{hour.hours}</td>
+                            <tr key={hour.id} className="hover:bg-neutral-700">
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">{hour.day}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">{hour.hours}</td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <button 
                                   onClick={() => {
                                     setNewHour(hour);
                                     editBusinessHour(hour.id);
                                   }} 
-                                  className="text-blue-600 hover:text-blue-900 mr-4"
+                                  className="text-blue-400 hover:text-blue-300 mr-4"
                                 >
                                   Edit
                                 </button>
                                 <button 
                                   onClick={() => deleteBusinessHour(hour.id)} 
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-400 hover:text-red-300"
                                 >
                                   Delete
                                 </button>
@@ -712,13 +699,13 @@ function App() {
             {/* Manage Testimonials */}
             <section>
               <h3 className="text-2xl font-bold mb-4">Manage Testimonials</h3>
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <h4 className="font-bold mb-2">Add New Testimonial</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Add New Testimonial</h4>
                     <form onSubmit={(e) => { e.preventDefault(); addTestimonial(); }}>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="name">
                           Name
                         </label>
                         <input 
@@ -726,19 +713,19 @@ function App() {
                           id="name" 
                           value={newTestimonial.name} 
                           onChange={(e) => setNewTestimonial({...newTestimonial, name: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           required 
                         />
                       </div>
                       <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="comment">
+                        <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="comment">
                           Comment
                         </label>
                         <textarea 
                           id="comment" 
                           value={newTestimonial.comment} 
                           onChange={(e) => setNewTestimonial({...newTestimonial, comment: e.target.value})} 
-                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                           rows="3" 
                           required 
                         ></textarea>
@@ -752,34 +739,34 @@ function App() {
                     </form>
                   </div>
                   <div>
-                    <h4 className="font-bold mb-2">Current Testimonials</h4>
+                    <h4 className="font-bold mb-2 text-gray-100">Current Testimonials</h4>
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
+                      <table className="min-w-full divide-y divide-gray-700">
+                        <thead className="bg-neutral-700">
                           <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comment</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Name</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Comment</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                           </tr>
                         </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                        <tbody className="bg-neutral-800 divide-y divide-gray-700">
                           {testimonials.map((testimonial) => (
-                            <tr key={testimonial.id}>
-                              <td className="px-6 py-4 whitespace-nowrap">{testimonial.name}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">{testimonial.comment}</td>
+                            <tr key={testimonial.id} className="hover:bg-neutral-700">
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">{testimonial.name}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">{testimonial.comment}</td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <button 
                                   onClick={() => {
                                     setNewTestimonial(testimonial);
                                     editTestimonial(testimonial.id);
                                   }} 
-                                  className="text-blue-600 hover:text-blue-900 mr-4"
+                                  className="text-blue-400 hover:text-blue-300 mr-4"
                                 >
                                   Edit
                                 </button>
                                 <button 
                                   onClick={() => deleteTestimonial(testimonial.id)} 
-                                  className="text-red-600 hover:text-red-900"
+                                  className="text-red-400 hover:text-red-300"
                                 >
                                   Delete
                                 </button>
@@ -797,10 +784,10 @@ function App() {
             {/* Manage Contact Info */}
             <section>
               <h3 className="text-2xl font-bold mb-4">Manage Contact Info</h3>
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 mb-6">
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700 mb-6">
                 <form onSubmit={(e) => { e.preventDefault(); updateContactInfo(); }}>
                   <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="phone">
+                    <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="phone">
                       Phone
                     </label>
                     <input 
@@ -808,12 +795,12 @@ function App() {
                       id="phone" 
                       value={contactInfo?.phone || ''} 
                       onChange={(e) => setContactInfo({...contactInfo, phone: e.target.value})} 
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                      className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                       required 
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="instagram">
+                    <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="instagram">
                       Instagram Handle
                     </label>
                     <input 
@@ -821,12 +808,12 @@ function App() {
                       id="instagram" 
                       value={contactInfo?.instagram || ''} 
                       onChange={(e) => setContactInfo({...contactInfo, instagram: e.target.value})} 
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                      className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                       required 
                     />
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="address">
+                    <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="address">
                       Address
                     </label>
                     <input 
@@ -834,7 +821,7 @@ function App() {
                       id="address" 
                       value={contactInfo?.address || ''} 
                       onChange={(e) => setContactInfo({...contactInfo, address: e.target.value})} 
-                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                      className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
                       required 
                     />
                   </div>
@@ -851,20 +838,20 @@ function App() {
             {/* View Users */}
             <section>
               <h3 className="text-2xl font-bold mb-4">Registered Users</h3>
-              <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                  <table className="min-w-full divide-y divide-gray-700">
+                    <thead className="bg-neutral-700">
                       <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Created At</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-neutral-800 divide-y divide-gray-700">
                       {users.map((user) => (
-                        <tr key={user.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-                          <td className="px-6 py-4 whitespace-nowrap">{new Date(user.created_at).toLocaleDateString()}</td>
+                        <tr key={user.id} className="hover:bg-neutral-700">
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-300">{user.email}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-300">{new Date(user.created_at).toLocaleDateString()}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -877,7 +864,7 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 text-gray-700 p-6 mt-12">
+      <footer className="bg-neutral-800 text-gray-300 p-6 mt-12">
         <div className="container mx-auto text-center">
           <p>&copy; {new Date().getFullYear()} Melita Bakes. All rights reserved.</p>
         </div>
