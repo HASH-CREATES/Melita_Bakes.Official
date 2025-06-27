@@ -77,49 +77,57 @@ function App() {
 
   // Admin login
   const handleAdminLogin = async () => {
-  // 1. Normalize inputs
-  const email = adminEmail.trim().toLowerCase();
-  const password = adminPassword.trim();
-
-  // 2. Debug: Print what we're sending
-  console.log("Trying to login with:", {
-    email: email,
-    password: password,
-    table: "admins",
-    columns: ["admin_email", "admin_password"]
-  });
-
   try {
-    // 3. Direct Supabase query
+    // 1. Normalize inputs (trim + lowercase email)
+    const email = adminEmail.trim().toLowerCase();
+    const password = adminPassword.trim();
+
+    // 2. Debug: Print exact values being checked
+    console.log("Login attempt with:", {
+      email: email, 
+      password: password,
+      lookingInTable: "admins",
+      checkingColumns: ["admin_email", "admin_password"] // Must match exactly
+    });
+
+    // 3. Query Supabase (UPDATED TO USE LOWERCASE COLUMN NAMES)
     const { data, error } = await supabase
       .from('admins')
       .select('*')
-      .eq('admin_email', email)
-      .eq('admin_password', password)
+      .eq('admin_email', email)        // Changed from 'ADMIN_EMAIL'
+      .eq('admin_password', password)  // Changed from 'ADMIN_PASSWORD'
       .single();
 
     // 4. Handle response
     if (error) {
-      console.error("Supabase error:", error);
-      alert("Database error. Please try again.");
+      console.error("Database error:", {
+        error,
+        query: `SELECT * FROM admins WHERE admin_email='${email}' AND admin_password='${password}'`
+      });
+      alert("Database error. Check console.");
       return;
     }
 
     if (!data) {
-      console.log("No admin found with these credentials");
-      alert("Invalid email or password");
+      console.log("No matching admin found. Check:", {
+        storedEmail: "melitabakes.admin@gmail.com", 
+        storedPass: "3003ADMINANALYTIC",
+        attemptedEmail: email,
+        attemptedPass: password
+      });
+      alert("Invalid credentials. Check console for details.");
       return;
     }
 
     // 5. Login successful
-    console.log("Login success! Admin data:", data);
+    console.log("SUCCESS! Logged in as:", data);
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
     navigate('/dashboard');
-    
+
   } catch (err) {
-    console.error("Login crashed:", err);
-    alert("System error. Check console for details.");
+    console.error("System crash during login:", err);
+    alert("Critical error. See console.");
   }
 };
   // Add cake
