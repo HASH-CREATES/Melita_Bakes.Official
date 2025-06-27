@@ -2,9 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-html { scroll-behavior: smooth; }
+/* ================= */
+/* SMOOTH SCROLLING  */
+/* ================= */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 6rem; /* Prevents header overlap */
+}
 
-/* Custom animation keyframes */
+/* ================= */
+/* CAKE ANIMATIONS   */
+/* ================= */
 @keyframes slide-rotate-hor-b-fwd {
   0% {
     transform: translateY(0) translateZ(0) rotateX(0deg);
@@ -18,5 +26,18 @@ html { scroll-behavior: smooth; }
 
 .slide-rotate-hor-b-fwd {
   -webkit-animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
-  animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
+          animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
+}
+
+/* ================= */
+/* SCROLLBAR STYLING */
+/* ================= */
+/* Optional: Makes scrollbars prettier */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
