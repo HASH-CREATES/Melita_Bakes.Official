@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+html { scroll-behavior: smooth; }
+
 /* Custom animation keyframes */
 @keyframes slide-rotate-hor-b-fwd {
   0% {
