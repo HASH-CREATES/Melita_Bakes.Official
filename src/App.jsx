@@ -77,37 +77,46 @@ function App() {
 
   // Admin login
   const handleAdminLogin = async () => {
-    try {
-      if (!adminEmail || !adminPassword) {
-        alert('Please enter both email and password');
-        return;
-      }
+  try {
+    // 1. CLEAN INPUTS (Trim whitespace + lowercase email)
+    const email = adminEmail.trim().toLowerCase();  // Fixes: "melitabakes.ADMIN@Gmail.com" → "melitabakes.admin@gmail.com"
+    const password = adminPassword.trim();          // Removes accidental spaces
 
-      const { data, error } = await supabase
-        .from('admins')
-        .select('*')
-        .eq('email', adminEmail)
-        .eq('password', adminPassword)
-        .single();
+    // 2. DEBUG: Log attempt (View in browser console)
+    console.log("LOGIN ATTEMPT:", { email, password });  // Verify what's being sent
 
-      if (error || !data) {
-        alert('Invalid credentials. Please try again.');
-        console.error('Login error:', error);
-        return;
-      }
+    // 3. SUPABASE QUERY (Match your EXACT column names)
+    const { data, error } = await supabase
+      .from('admins')                   // Table name (case-sensitive)
+      .select('*')                      // Select all columns
+      .eq('admin_email', email)         // Must match your column name exactly
+      .eq('admin_password', password)   // Must match your column name exactly
+      .single();                        // Expect only 1 admin
 
-      setIsAdminLoggedIn(true);
-      setCurrentView('dashboard');
-      navigate('/dashboard');
-      window.scrollTo(0, 0);
-      loadUsers();
-      loadCakes();
-      setAdminPassword('');
-    } catch (err) {
-      console.error('Login failed:', err);
-      alert('Login failed. Please try again later.');
+    // 4. HANDLE FAILURES
+    if (error || !data) {
+      console.error("FAILED LOGIN:", { 
+        error, 
+        supabaseResponse: data,
+        inputEmail: email, 
+        tableColumns: ["admin_email", "admin_password"]  // ← Verify these match your DB
+      });
+      alert("❌ Invalid email or password");
+      return;
     }
-  };
+
+    // 5. SUCCESS! (Update state + redirect)
+    setIsAdminLoggedIn(true);            // Sets admin state to TRUE
+    setCurrentView('dashboard');         // Switches view
+    navigate('/dashboard');              // Updates URL
+    console.log("✅ LOGIN SUCCESS!");    // Debug confirmation
+
+  } catch (err) {
+    // 6. CRASH RECOVERY
+    console.error("🚨 SYSTEM ERROR:", err);
+    alert("Server error. Please refresh and try again.");
+  }
+};
 
   // Add cake
   const addCake = async () => {
