@@ -3,6 +3,7 @@ import './App.css'; // Will include the slide-rotate-hor-b-fwd animation
 
 // Import Supabase client
 import { createClient } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
@@ -10,6 +11,7 @@ const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 function App() {
+  const navigate = useNavigate();
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [currentView, setCurrentView] = useState('home');
   const [cakes, setCakes] = useState([]);
@@ -31,14 +33,17 @@ function App() {
 
   // Load data from Supabase
   useEffect(() => {
-    if (isAdminLoggedIn) {
-      loadCakes();
-      loadHours();
-      loadTestimonials();
-      loadContactInfo();
-      loadUsers();
-    }
-  }, [isAdminLoggedIn]);
+  // Always load these (public data)
+  loadCakes();
+  loadHours();
+  loadTestimonials();
+  loadContactInfo();
+
+  // Only load users if admin is logged in
+  if (isAdminLoggedIn) {
+    loadUsers();
+  }
+}, [isAdminLoggedIn]); // Only re-run when login changes
 
   // Load cakes
   const loadCakes = async () => {
@@ -76,7 +81,15 @@ function App() {
   };
 
   // Admin login
-  const handleAdminLogin = async () => {
+   const handleAdminLogin = async () => {
+  try {
+    // 1. Validate inputs
+    if (!adminEmail || !adminPassword) {
+      alert('Please enter both email and password');
+      return;
+    }
+
+    // 2. Check admin credentials in Supabase
     const { data, error } = await supabase
       .from('admins')
       .select('*')
@@ -84,14 +97,31 @@ function App() {
       .eq('password', adminPassword)
       .single();
 
-    if (error) {
-      alert('Invalid email or password');
+    // 3. Handle errors
+    if (error || !data) {
+      alert('Invalid credentials. Please try again.');
+      console.error('Login error:', error);
       return;
     }
 
+    // 4. Successful login actions
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
-  };
+    navigate('/dashboard');  // Programmatic navigation
+    window.scrollTo(0, 0);   // Scroll to top
+
+    // 5. Load admin-specific data
+    loadUsers();
+    loadCakes(); // Refresh data
+    
+    // 6. Clear password field (security best practice)
+    setAdminPassword('');
+
+  } catch (err) {
+    console.error('Login failed:', err);
+    alert('Login failed. Please try again later.');
+  }
+};
 
   // Add cake
   const addCake = async () => {
@@ -297,26 +327,68 @@ function App() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-pink-500 text-white p-4 shadow-md">
-       <div className="container mx-auto flex justify-between items-center">
-         <h1 className="text-2xl font-bold">Melita Bakes</h1>
-          <nav>
-           <ul className="flex space-x-4">
-              <li><button onClick={() => setCurrentView('home')} className="hover:underline">Home</but
-ton></li>
-              <li><button onClick={() => setCurrentView('home#about')} className="hover:underline">Abo
-ut</button></li>
-             <li><button onClick={() => setCurrentView('home#contact')} className="hover:underline">C
-ontact</button></li>
-            {!isAdminLoggedIn && (
-              <li><button onClick={() => setCurrentView('admin-login')} className="hover:underline">
-Admin</button></li>
+       <header className="bg-pink-500 text-white p-4 shadow-md">
+  <div className="container mx-auto flex justify-between items-center">
+    <h1 className="text-2xl font-bold cursor-pointer" onClick={() => {
+      setCurrentView('home');
+      window.scrollTo(0, 0); // Scroll to top when clicking logo
+    }}>Melita Bakes</h1>
+    <nav>
+      <ul className="flex space-x-4">
+        <li>
+          <button 
+            onClick={() => {
+              setCurrentView('home');
+              document.getElementById('home')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+          >
+            Home
+          </button>
+        </li>
+        <li>
+          <button 
+            onClick={() => {
+              setCurrentView('home');
+              setTimeout(() => { // Small delay for state update
+                document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+              }, 50);
+            }}
+            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+          >
+            About
+          </button>
+        </li>
+        <li>
+          <button 
+            onClick={() => {
+              setCurrentView('home');
+              setTimeout(() => {
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }, 50);
+            }}
+            className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+          >
+            Contact
+          </button>
+        </li>
+        {!isAdminLoggedIn && (
+          <li>
+            <button 
+              onClick={() => {
+                setCurrentView('admin-login');
+                window.scrollTo(0, 0);
+              }}
+              className="hover:underline px-2 py-1 rounded transition hover:bg-pink-600"
+            >
+              Admin
+            </button>
+          </li>
         )}
       </ul>
     </nav>
   </div>
 </header>
-
       {/* Main content */}
       <main className="container mx-auto p-4">
         {currentView === 'home' && (
