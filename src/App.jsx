@@ -78,19 +78,19 @@ function App() {
   // Admin login
   const handleAdminLogin = async () => {
   try {
-    // 1. Normalize inputs (trim + lowercase email)
+    // 1️⃣ Normalize inputs
     const email = adminEmail.trim().toLowerCase();
     const password = adminPassword.trim();
 
-    // 2. Debug: Print exact values being checked
+    // 2️⃣ Debug log
     console.log("Login attempt with:", {
-      email: email, 
-      password: "[REDACTED]", // Don't log actual passwords
-      lookingInTable: "admins",
-      checkingColumns: ["admin_email", "admin_password"]
+      email, 
+      password: "[REDACTED]",
+      table: "admins",
+      columns: ["admin_email", "admin_password"]
     });
 
-    // 3. Query Supabase
+    // 3️⃣ Supabase query
     const { data, error } = await supabase
       .from('admins')
       .select('*')
@@ -98,36 +98,37 @@ function App() {
       .eq('admin_password', password)
       .single();
 
-    // 4. Handle response
+    // 4️⃣ Error check
     if (error) {
       console.error("Database error:", {
         error,
         query: `SELECT * FROM admins WHERE admin_email='${email}'`
       });
-      alert("Database error. Check console.");
+      alert("Database issue. Check console.");
       return;
     }
 
+    // 5️⃣ No matching data
     if (!data) {
-      console.log("No matching admin found. Check:", {
-        attemptedEmail: email,
-        attemptedPass: "[REDACTED]" // Don't log actual passwords
+      console.log("No admin match found for:", {
+        attemptedEmail: email
       });
-      alert("Invalid credentials.");
+      alert("Invalid login.");
       return;
     }
 
-    // 5. Login successful
-    console.log("SUCCESS! Logged in as admin:", data.admin_email);
+    // 6️⃣ Success
+    console.log("Admin login success:", data.admin_email);
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
     navigate('/dashboard');
 
   } catch (err) {
-    console.error("System crash during login:", err);
-    alert("Critical error. See console.");
+    console.error("Fatal login error:", err);
+    alert("Unexpected error. See console.");
   }
 };
+
   // Add cake
   const addCake = async () => {
     if (!cakeImageFile) {
