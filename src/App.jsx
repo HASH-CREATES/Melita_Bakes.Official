@@ -78,17 +78,11 @@ function App() {
   // Admin login
   const handleAdminLogin = async () => {
   try {
-    // 1️⃣ Normalize and sanitize inputs
     const email = adminEmail.trim().toLowerCase();
     const password = adminPassword.trim();
 
-    // 2️⃣ Debug: print what values you're sending
-    console.log("Login attempt with:", {
-      email,
-      password: "[HIDDEN]" // never log plain passwords
-    });
+    console.log("Login attempt with:", { email });
 
-    // 3️⃣ Query Supabase for matching admin
     const { data, error } = await supabase
       .from('admins')
       .select('*')
@@ -96,33 +90,27 @@ function App() {
       .eq('admin_password', password)
       .single();
 
-    // 4️⃣ Handle Supabase errors
     if (error) {
       console.error("Database error while checking admin login:", error);
-      alert("Database issue. See console.");
+      alert("Database error. See console.");
       return;
     }
 
-    // 5️⃣ If no admin found
     if (!data) {
-      console.log("No matching admin found for:", email);
       alert("Invalid credentials.");
       return;
     }
 
-    // 6️⃣ Successful login — set state and navigate
-    console.log("✅ SUCCESS! Logged in as admin:", data.admin_email);
+    console.log("Admin logged in successfully:", data);
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
     navigate('/dashboard');
 
   } catch (err) {
-    // 7️⃣ Any unexpected error
-    console.error("Unexpected error during login:", err);
-    alert("System error. See console.");
+    console.error("Critical login error:", err);
+    alert("Something went wrong. Check console.");
   }
 };
-
 
   // Add cake
   const addCake = async () => {
