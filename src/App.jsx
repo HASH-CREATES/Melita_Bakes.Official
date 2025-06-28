@@ -78,19 +78,17 @@ function App() {
   // Admin login
   const handleAdminLogin = async () => {
   try {
-    // 1️⃣ Normalize inputs
+    // 1️⃣ Normalize and sanitize inputs
     const email = adminEmail.trim().toLowerCase();
     const password = adminPassword.trim();
 
-    // 2️⃣ Debug log
+    // 2️⃣ Debug: print what values you're sending
     console.log("Login attempt with:", {
-      email, 
-      password: "[REDACTED]",
-      table: "admins",
-      columns: ["admin_email", "admin_password"]
+      email,
+      password: "[HIDDEN]" // never log plain passwords
     });
 
-    // 3️⃣ Supabase query
+    // 3️⃣ Query Supabase for matching admin
     const { data, error } = await supabase
       .from('admins')
       .select('*')
@@ -98,36 +96,33 @@ function App() {
       .eq('admin_password', password)
       .single();
 
-    // 4️⃣ Error check
+    // 4️⃣ Handle Supabase errors
     if (error) {
-      console.error("Database error:", {
-        error,
-        query: `SELECT * FROM admins WHERE admin_email='${email}'`
-      });
-      alert("Database issue. Check console.");
+      console.error("Database error while checking admin login:", error);
+      alert("Database issue. See console.");
       return;
     }
 
-    // 5️⃣ No matching data
+    // 5️⃣ If no admin found
     if (!data) {
-      console.log("No admin match found for:", {
-        attemptedEmail: email
-      });
-      alert("Invalid login.");
+      console.log("No matching admin found for:", email);
+      alert("Invalid credentials.");
       return;
     }
 
-    // 6️⃣ Success
-    console.log("Admin login success:", data.admin_email);
+    // 6️⃣ Successful login — set state and navigate
+    console.log("✅ SUCCESS! Logged in as admin:", data.admin_email);
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
     navigate('/dashboard');
 
   } catch (err) {
-    console.error("Fatal login error:", err);
-    alert("Unexpected error. See console.");
+    // 7️⃣ Any unexpected error
+    console.error("Unexpected error during login:", err);
+    alert("System error. See console.");
   }
 };
+
 
   // Add cake
   const addCake = async () => {
