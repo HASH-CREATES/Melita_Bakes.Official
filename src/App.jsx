@@ -85,24 +85,24 @@ function App() {
     // 2. Debug: Print exact values being checked
     console.log("Login attempt with:", {
       email: email, 
-      password: password,
+      password: "[REDACTED]", // Don't log actual passwords
       lookingInTable: "admins",
-      checkingColumns: ["admin_email", "admin_password"] // Must match exactly
+      checkingColumns: ["admin_email", "admin_password"]
     });
 
-    // 3. Query Supabase (UPDATED TO USE LOWERCASE COLUMN NAMES)
+    // 3. Query Supabase
     const { data, error } = await supabase
       .from('admins')
       .select('*')
-      .eq('admin_email', email)        // Changed from 'ADMIN_EMAIL'
-      .eq('admin_password', password)  // Changed from 'ADMIN_PASSWORD'
+      .eq('admin_email', email)
+      .eq('admin_password', password)
       .single();
 
     // 4. Handle response
     if (error) {
       console.error("Database error:", {
         error,
-        query: `SELECT * FROM admins WHERE admin_email='${email}' AND admin_password='${password}'`
+        query: `SELECT * FROM admins WHERE admin_email='${email}'`
       });
       alert("Database error. Check console.");
       return;
@@ -110,17 +110,15 @@ function App() {
 
     if (!data) {
       console.log("No matching admin found. Check:", {
-        storedEmail: "melitabakes.admin@gmail.com", 
-        storedPass: "3003ADMINANALYTIC",
         attemptedEmail: email,
-        attemptedPass: password
+        attemptedPass: "[REDACTED]" // Don't log actual passwords
       });
-      alert("Invalid credentials. Check console for details.");
+      alert("Invalid credentials.");
       return;
     }
 
     // 5. Login successful
-    console.log("SUCCESS! Logged in as:", data);
+    console.log("SUCCESS! Logged in as admin:", data.admin_email);
     setIsAdminLoggedIn(true);
     setCurrentView('dashboard');
     navigate('/dashboard');
