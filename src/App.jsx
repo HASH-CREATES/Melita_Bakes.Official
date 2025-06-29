@@ -24,16 +24,82 @@ function App() {
   const [newHour, setNewHour] = useState({ day: '', hours: '' });
   const [newTestimonial, setNewTestimonial] = useState({ name: '', comment: '' });
 
+  // --- New state for siteSettings and logo
+  const [siteSettings, setSiteSettings] = useState({ logo_url: '' });
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  // ---
+
   // Load data from Supabase
   useEffect(() => {
     loadCakes();
     loadHours();
     loadTestimonials();
     loadContactInfo();
+    loadSiteSettings(); // NEW: load logo on app load
     if (isAdminLoggedIn) {
       loadUsers();
     }
   }, [isAdminLoggedIn]);
+
+  // NEW: load site settings (logo)
+  const loadSiteSettings = async () => {
+    const { data, error } = await supabase
+      .from('site_settings')
+      .select('logo_url')
+      .eq('id', 1)
+      .single();
+    if (error) {
+      console.error('Error loading site settings:', error);
+      return;
+    }
+    setSiteSettings(data);
+  };
+
+  // NEW: handle logo upload and update
+  const handleLogoUpload = async () => {
+    if (!logoFile) {
+      alert('Please select a logo file first.');
+      return;
+    }
+    setLogoUploading(true);
+    try {
+      const fileExt = logoFile.name.split('.').pop();
+      const fileName = `logo.${fileExt}`;
+      const filePath = `logo/${fileName}`;
+
+      // Upload to Supabase storage (site-assets bucket)
+      const { error: uploadError } = await supabase.storage
+        .from('site-assets')
+        .upload(filePath, logoFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('site-assets')
+        .getPublicUrl(filePath);
+
+      // Update DB
+      const { error: updateError } = await supabase
+        .from('site_settings')
+        .update({ logo_url: publicUrl })
+        .eq('id', 1);
+
+      if (updateError) throw updateError;
+
+      setSiteSettings((s) => ({ ...s, logo_url: publicUrl }));
+      setLogoFile(null);
+      alert('Logo updated successfully!');
+    } catch (err) {
+      console.error('Logo upload error:', err);
+      alert('Failed to upload logo.');
+    } finally {
+      setLogoUploading(false);
+      loadSiteSettings();
+    }
+  };
 
   // Load cakes
   const loadCakes = async () => {
@@ -72,120 +138,78 @@ function App() {
 
   // Admin login
   const handleAdminLogin = async () => {
-  try {
-    const email = adminEmail.trim().toLowerCase();
-    const password = adminPassword.trim();
+    try {
+      const email = adminEmail.trim().toLowerCase();
+      const password = adminPassword.trim();
 
-    console.log("Login attempt with:", { email });
+      console.log("Login attempt with:", { email });
 
-    const { data, error } = await supabase
-      .from('admins')
-      .select('*')
-      .eq('admin_email', email)
-      .eq('admin_password', password)
-      .single();
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('admin_email', email)
+        .eq('admin_password', password)
+        .single();
 
-    if (error) {
-      console.error("Database error while checking admin login:", error);
-      alert("Database error. See console.");
-      return;
+      if (error) {
+        console.error("Database error while checking admin login:", error);
+        alert("Database error. See console.");
+        return;
+      }
+
+      if (!data) {
+        alert("Invalid credentials.");
+        return;
+      }
+
+      console.log("Admin logged in successfully:", data);
+      setIsAdminLoggedIn(true);
+      setCurrentView('dashboard');
+      navigate('/dashboard');
+
+    } catch (err) {
+      console.error("Critical login error:", err);
+      alert("Something went wrong. Check console.");
     }
-
-    if (!data) {
-      alert("Invalid credentials.");
-      return;
-    }
-
-    console.log("Admin logged in successfully:", data);
-    setIsAdminLoggedIn(true);
-    setCurrentView('dashboard');
-    navigate('/dashboard');
-
-  } catch (err) {
-    console.error("Critical login error:", err);
-    alert("Something went wrong. Check console.");
-  }
-};
-
-  // Add cake
-  <div className="p-4 bg-white rounded shadow mb-6">
-  <h2 className="text-xl font-bold mb-4">Add New Cake</h2>
-
-  <input
-    type="text"
-    placeholder="Name"
-    value={newCake.name}
-    onChange={(e) => setNewCake({ ...newCake, name: e.target.value })}
-    className="border p-2 mb-2 w-full"
-  />
-
-  <input
-    type="number"
-    placeholder="Price"
-    value={newCake.price}
-    onChange={(e) => setNewCake({ ...newCake, price: e.target.value })}
-    className="border p-2 mb-2 w-full"
-  />
-
-  <textarea
-    placeholder="Description"
-    value={newCake.description}
-    onChange={(e) => setNewCake({ ...newCake, description: e.target.value })}
-    className="border p-2 mb-2 w-full"
-  />
-
-  <input
-    type="file"
-    accept="image/*"
-    onChange={(e) => setCakeImageFile(e.target.files[0])}
-    className="border p-2 mb-4 w-full"
-  />
-
-  <button
-    onClick={addCake}
-    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-  >
-    Add Cake
-  </button>
-</div>
+  };
 
   // Edit cake
   const editCake = async () => {
-  let imageUrl = newCake.image_url;
+    let imageUrl = newCake.image_url;
 
-  if (cakeImageFile) {
-    const fileExt = cakeImageFile.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
+    if (cakeImageFile) {
+      const fileExt = cakeImageFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('cakes-images')
-      .upload(`public/${fileName}`, cakeImageFile);  // ✅ fixed path
+      const { error: uploadError } = await supabase.storage
+        .from('cakes-images')
+        .upload(`public/${fileName}`, cakeImageFile);  // ✅ fixed path
 
-    if (uploadError) {
-      console.error(uploadError);
-      alert('Error uploading image');
+      if (uploadError) {
+        console.error(uploadError);
+        alert('Error uploading image');
+        return;
+      }
+
+      imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`;
+    }
+
+    const { error } = await supabase
+      .from('cakes')
+      .update({ ...newCake, image_url: imageUrl })
+      .eq('id', editingCakeId);
+
+    if (error) {
+      console.error(error);
+      alert('Error updating cake');
       return;
     }
 
-    imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`;
-  }
-
-  const { error } = await supabase
-    .from('cakes')
-    .update({ ...newCake, image_url: imageUrl })
-    .eq('id', editingCakeId);
-
-  if (error) {
-    console.error(error);
-    alert('Error updating cake');
-    return;
-  }
-
-  setEditingCakeId(null);
-  setNewCake({ name: '', price: '', description: '' });
-  setCakeImageFile(null);
-  loadCakes();
-};
+    setEditingCakeId(null);
+    setNewCake({ name: '', price: '', description: '' });
+    setCakeImageFile(null);
+    loadCakes();
+  };
 
   // Delete cake
   const deleteCake = async (id) => {
@@ -279,7 +303,6 @@ function App() {
       return;
     }
 
-    setNewTestimonial({ name: '', comment: '' });
     loadTestimonials();
   };
 
@@ -379,10 +402,21 @@ function App() {
         </div>
       </header>
 
-      {/* Logo Header - Added here */}
-      <div className="logo-holder">
-        <img src="/logo.png" alt="Melita Bakes" />
-        <h1>Melita Bakes</h1>
+      {/* Logo Header - dynamic logo + styling */}
+      <div className="logo-holder flex flex-col items-center justify-center py-4">
+        {siteSettings.logo_url ? (
+          <img
+            src={siteSettings.logo_url}
+            alt="Melita Bakes"
+            className="w-24 h-24 md:w-32 md:h-32 object-contain mb-2"
+            style={{ maxWidth: '8rem', maxHeight: '8rem' }}
+          />
+        ) : (
+          <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-100 flex items-center justify-center rounded mb-2">
+            <span className="text-gray-500">No Logo</span>
+          </div>
+        )}
+        <h1 className="text-2xl md:text-3xl font-bold">Melita Bakes</h1>
       </div>
 
       {/* Main content */}
@@ -452,7 +486,7 @@ function App() {
               <h3 className="text-2xl font-bold mb-6 text-center">Contact Us</h3>
               <div className="max-w-2xl mx-auto bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
                 <p className="mb-2 text-gray-300"><strong className="text-gray-100">Phone:</strong> {contactInfo?.phone || 'N/A'}</p>
-                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer" className="text-pink-400 underline">{contactInfo?.instagram || 'N/A'}</a></p>
+                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer" className="underline">@{contactInfo?.instagram}</a></p>
                 <p className="text-gray-300"><strong className="text-gray-100">Address:</strong> {contactInfo?.address || 'N/A'}</p>
               </div>
             </section>
@@ -504,6 +538,35 @@ function App() {
         {isAdminLoggedIn && currentView === 'dashboard' && (
           <div className="space-y-8">
             <h2 className="text-3xl font-bold mb-6 text-center">Admin Dashboard</h2>
+
+            {/* --- New: Change Site Logo --- */}
+            <section>
+              <h3 className="text-2xl font-bold mb-4">Change Site Logo</h3>
+              <div className="bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700 mb-6 flex items-center space-x-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={e => setLogoFile(e.target.files[0])}
+                  className="border p-2 rounded w-full max-w-xs bg-neutral-900 text-gray-100"
+                  disabled={logoUploading}
+                />
+                <button
+                  onClick={handleLogoUpload}
+                  className="bg-pink-500 hover:bg-pink-600 text-white font-bold px-4 py-2 rounded disabled:opacity-50"
+                  disabled={logoUploading}
+                >
+                  {logoUploading ? 'Uploading...' : 'Upload Logo'}
+                </button>
+                {siteSettings.logo_url && (
+                  <img
+                    src={siteSettings.logo_url}
+                    alt="Current Logo"
+                    className="w-16 h-16 object-contain ml-4 rounded"
+                  />
+                )}
+              </div>
+            </section>
+            {/* --- End: Change Site Logo --- */}
 
             {/* Manage Cakes */}
             <section>
