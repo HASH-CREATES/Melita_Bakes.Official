@@ -412,7 +412,7 @@ function App() {
                       </div>
                       <div className="p-4">
                         <h4 className="font-bold text-lg">{cake.name}</h4>
-                        <p className="text-gray-300">${cake.price}</p>
+                        <p className="text-gray-300">₹{cake.price}</p>
                         <p className="text-sm text-gray-400 mt-2">{cake.description}</p>
                       </div>
                     </div>
@@ -452,7 +452,7 @@ function App() {
               <h3 className="text-2xl font-bold mb-6 text-center">Contact Us</h3>
               <div className="max-w-2xl mx-auto bg-neutral-800 p-6 rounded-lg shadow-md border border-gray-700">
                 <p className="mb-2 text-gray-300"><strong className="text-gray-100">Phone:</strong> {contactInfo?.phone || 'N/A'}</p>
-                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer" className="text-pink-400 hover:underline">@{contactInfo?.instagram || 'N/A'}</a></p>
+                <p className="mb-2 text-gray-300"><strong className="text-gray-100">Instagram:</strong> <a href={`https://instagram.com/${contactInfo?.instagram}`} target="_blank" rel="noopener noreferrer" className="text-pink-400 underline">{contactInfo?.instagram || 'N/A'}</a></p>
                 <p className="text-gray-300"><strong className="text-gray-100">Address:</strong> {contactInfo?.address || 'N/A'}</p>
               </div>
             </section>
@@ -530,14 +530,17 @@ function App() {
                         <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="price">
                           Price
                         </label>
-                        <input 
-                          type="number" 
-                          id="price" 
-                          value={newCake.price} 
-                          onChange={(e) => setNewCake({...newCake, price: e.target.value})} 
-                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
-                          required 
-                        />
+                        <div className="relative">
+                          <span className="absolute left-3 top-2 text-gray-300">₹</span>
+                          <input 
+                            type="number" 
+                            id="price" 
+                            value={newCake.price} 
+                            onChange={(e) => setNewCake({...newCake, price: e.target.value})} 
+                            className="w-full pl-8 px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                            required 
+                          />
+                        </div>
                       </div>
                       <div className="mb-4">
                         <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="description">
@@ -587,7 +590,7 @@ function App() {
                           {cakes.map((cake) => (
                             <tr key={cake.id} className="hover:bg-neutral-700">
                               <td className="px-6 py-4 whitespace-nowrap text-gray-300">{cake.name}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">${cake.price}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-gray-300">₹{cake.price}</td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <button 
                                   onClick={() => {
