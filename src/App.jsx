@@ -108,41 +108,46 @@ function App() {
 };
 
   // Add cake
-  const addCake = async () => {
-  if (!cakeImageFile) {
-    alert('Please upload an image');
-    return;
-  }
+  <div className="p-4 bg-white rounded shadow mb-6">
+  <h2 className="text-xl font-bold mb-4">Add New Cake</h2>
 
-  const fileExt = cakeImageFile.name.split('.').pop();
-  const fileName = `${Math.random()}.${fileExt}`;
+  <input
+    type="text"
+    placeholder="Name"
+    value={newCake.name}
+    onChange={(e) => setNewCake({ ...newCake, name: e.target.value })}
+    className="border p-2 mb-2 w-full"
+  />
 
-  const { error: uploadError } = await supabase.storage
-    .from('cakes-images')
-    .upload(`public/${fileName}`, cakeImageFile);   // ✅ fixed path
+  <input
+    type="number"
+    placeholder="Price"
+    value={newCake.price}
+    onChange={(e) => setNewCake({ ...newCake, price: e.target.value })}
+    className="border p-2 mb-2 w-full"
+  />
 
-  if (uploadError) {
-    console.error(uploadError);
-    alert('Error uploading image');
-    return;
-  }
+  <textarea
+    placeholder="Description"
+    value={newCake.description}
+    onChange={(e) => setNewCake({ ...newCake, description: e.target.value })}
+    className="border p-2 mb-2 w-full"
+  />
 
-  const imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`;
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setCakeImageFile(e.target.files[0])}
+    className="border p-2 mb-4 w-full"
+  />
 
-  const { error: insertError } = await supabase
-    .from('cakes')
-    .insert([{ ...newCake, image_url: imageUrl }]);
-
-  if (insertError) {
-    console.error(insertError);
-    alert('Error adding cake');
-    return;
-  }
-
-  setNewCake({ name: '', price: '', description: '' });
-  setCakeImageFile(null);
-  loadCakes();
-};
+  <button
+    onClick={addCake}
+    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
+  >
+    Add Cake
+  </button>
+</div>
 
   // Edit cake
   const editCake = async () => {
