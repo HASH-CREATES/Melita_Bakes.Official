@@ -7,7 +7,7 @@
 /* ================= */
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 6rem; /* Prevents header overlap */
+  scroll-padding-top: 6rem;
 }
 
 /* ================= */
@@ -26,13 +26,12 @@ html {
 
 .slide-rotate-hor-b-fwd {
   -webkit-animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
-          animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
+  animation: slide-rotate-hor-b-fwd 1s cubic-bezier(0.250, 0.460, 0.450, 0.940) 1s reverse forwards;
 }
 
 /* ================= */
 /* SCROLLBAR STYLING */
 /* ================= */
-/* Optional: Makes scrollbars prettier */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -40,4 +39,67 @@ html {
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ================= */
+/* LOGO HOLDER       */
+/* ================= */
+.logo-holder {
+  @apply flex items-center gap-3 p-4 bg-white shadow mb-6;
+}
+
+.logo-holder img {
+  @apply w-12 h-12 rounded-full;
+}
+
+.logo-holder h1 {
+  @apply text-2xl font-bold;
+}
+
+/* ================= */
+/* CARD & FORM STYLES */
+/* ================= */
+.card {
+  @apply bg-white rounded shadow p-4 mb-4;
+}
+
+.card-title {
+  @apply text-lg font-bold mb-2;
+}
+
+.input-field {
+  @apply border p-2 mb-3 w-full rounded;
+}
+
+.primary-button {
+  @apply bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full;
+}
+
+.danger-button {
+  @apply bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700;
+}
+
+/* ================= */
+/* RESPONSIVE GRID   */
+/* ================= */
+.responsive-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4;
+}
+
+/* ================= */
+/* IMAGE STYLING     */
+/* ================= */
+.cake-image {
+  @apply w-full h-40 object-cover rounded mb-2;
+}
+
+/* ================= */
+/* UTILITY CLASSES   */
+/* ================= */
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  @apply text-gray-500 text-sm;
 }
