@@ -379,6 +379,12 @@ function App() {
         </div>
       </header>
 
+      {/* Logo Header - Added here */}
+      <div className="logo-holder">
+        <img src="/logo.png" alt="Melita Bakes" />
+        <h1>Melita Bakes</h1>
+      </div>
+
       {/* Main content */}
       <main className="container mx-auto p-4">
         {currentView === 'home' && (
