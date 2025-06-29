@@ -109,17 +109,52 @@ function App() {
 
   // Add cake
   const addCake = async () => {
-    if (!cakeImageFile) {
-      alert('Please upload an image');
-      return;
-    }
+  if (!cakeImageFile) {
+    alert('Please upload an image');
+    return;
+  }
 
+  const fileExt = cakeImageFile.name.split('.').pop();
+  const fileName = `${Math.random()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('cakes-images')
+    .upload(`public/${fileName}`, cakeImageFile);   // ✅ fixed path
+
+  if (uploadError) {
+    console.error(uploadError);
+    alert('Error uploading image');
+    return;
+  }
+
+  const imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`;
+
+  const { error: insertError } = await supabase
+    .from('cakes')
+    .insert([{ ...newCake, image_url: imageUrl }]);
+
+  if (insertError) {
+    console.error(insertError);
+    alert('Error adding cake');
+    return;
+  }
+
+  setNewCake({ name: '', price: '', description: '' });
+  setCakeImageFile(null);
+  loadCakes();
+};
+
+  // Edit cake
+  const editCake = async () => {
+  let imageUrl = newCake.image_url;
+
+  if (cakeImageFile) {
     const fileExt = cakeImageFile.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
-    
+
     const { error: uploadError } = await supabase.storage
       .from('cakes-images')
-      .upload(fileName, cakeImageFile);
+      .upload(`public/${fileName}`, cakeImageFile);  // ✅ fixed path
 
     if (uploadError) {
       console.error(uploadError);
@@ -127,60 +162,25 @@ function App() {
       return;
     }
 
-    const imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`; 
+    imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`;
+  }
 
-    const { error: insertError } = await supabase
-      .from('cakes')
-      .insert([{ ...newCake, image_url: imageUrl }]);
+  const { error } = await supabase
+    .from('cakes')
+    .update({ ...newCake, image_url: imageUrl })
+    .eq('id', editingCakeId);
 
-    if (insertError) {
-      console.error(insertError);
-      alert('Error adding cake');
-      return;
-    }
+  if (error) {
+    console.error(error);
+    alert('Error updating cake');
+    return;
+  }
 
-    setNewCake({ name: '', price: '', description: '' });
-    setCakeImageFile(null);
-    loadCakes();
-  };
-
-  // Edit cake
-  const editCake = async () => {
-    let imageUrl = newCake.image_url;
-
-    if (cakeImageFile) {
-      const fileExt = cakeImageFile.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage
-        .from('cakes-images')
-        .upload(fileName, cakeImageFile);
-
-      if (uploadError) {
-        console.error(uploadError);
-        alert('Error uploading image');
-        return;
-      }
-
-      imageUrl = `https://${supabaseUrl.split('//')[1]}/storage/v1/object/public/cakes-images/${fileName}`; 
-    }
-
-    const { error } = await supabase
-      .from('cakes')
-      .update({ ...newCake, image_url: imageUrl })
-      .eq('id', editingCakeId);
-
-    if (error) {
-      console.error(error);
-      alert('Error updating cake');
-      return;
-    }
-
-    setEditingCakeId(null);
-    setNewCake({ name: '', price: '', description: '' });
-    setCakeImageFile(null);
-    loadCakes();
-  };
+  setEditingCakeId(null);
+  setNewCake({ name: '', price: '', description: '' });
+  setCakeImageFile(null);
+  loadCakes();
+};
 
   // Delete cake
   const deleteCake = async (id) => {
