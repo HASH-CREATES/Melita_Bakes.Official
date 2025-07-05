@@ -433,20 +433,20 @@ function App() {
         </div>
       </header>
 
-      {/* Logo Header */}
+      {/* Logo Header - Now with much larger logo */}
       <div className="logo-holder w-full flex flex-col items-center justify-center py-8" style={{ backgroundColor: '#fc94ad' }}>
         {siteSettings.logo_url ? (
           <img
             src={siteSettings.logo_url}
             alt="Melita Bakes"
-            className="w-48 h-48 object-contain mb-4 rounded-full border-4 border-white shadow-lg"
+            className="w-64 h-64 object-contain mb-4 rounded-full border-4 border-white shadow-lg"
           />
         ) : (
-          <div className="w-48 h-48 bg-white flex items-center justify-center rounded-full border-4 border-white shadow-lg mb-4">
-            <span className="text-gray-500">No Logo</span>
+          <div className="w-64 h-64 bg-white flex items-center justify-center rounded-full border-4 border-white shadow-lg mb-4">
+            <span className="text-gray-500 text-lg">No Logo</span>
           </div>
         )}
-        <h1 className="text-3xl font-bold text-white">Melita Bakes</h1>
+        <h1 className="text-4xl font-bold text-white">Melita Bakes</h1>
       </div>
 
       {/* Main content */}
@@ -457,7 +457,7 @@ function App() {
             <section id="home" className="py-12 text-center">
               <h2 className="text-4xl font-bold mb-4">Delicious Cakes by Melita</h2>
               <p className="text-xl max-w-2xl mx-auto mb-8">Crafting beautiful and tasty cakes since 2023.</p>
-              <img src="https://placehold.co/600x400" alt="Melita Bakes" className="mx-auto rounded-lg shadow-lg" />
+              <img src="https://placehold.co/600x400" alt="Melita Bakes" className="mx-auto rounded-lg shadow-lg w-full max-w-3xl" />
             </section>
 
             {/* Cake Carousel */}
@@ -466,7 +466,7 @@ function App() {
               <div className="overflow-x-scroll pb-4 hide-scrollbar">
                 <div className="flex space-x-4">
                   {cakes.map((cake) => (
-                    <div key={cake.id} className="w-64 h-96 bg-neutral-800 rounded-lg overflow-hidden shadow-md flex-shrink-0">
+                    <div key={cake.id} className="w-72 h-96 bg-neutral-800 rounded-lg overflow-hidden shadow-md flex-shrink-0">
                       <div className="relative w-full h-64">
                         <img 
                           src={cake.image_url || 'https://placehold.co/300x300'} 
@@ -594,7 +594,7 @@ function App() {
                   </button>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-32 h-32 rounded-full border-4 border-white shadow-md flex items-center justify-center" style={{ backgroundColor: '#fc94ad' }}>
+                  <div className="w-48 h-48 rounded-full border-4 border-white shadow-md flex items-center justify-center" style={{ backgroundColor: '#fc94ad' }}>
                     {siteSettings.logo_url ? (
                       <img
                         src={siteSettings.logo_url}
@@ -605,7 +605,7 @@ function App() {
                       <span className="text-gray-500">No Logo</span>
                     )}
                   </div>
-                  <p className="mt-2 text-sm text-gray-300">Current Logo</p>
+                  <p className="mt-2 text-sm text-gray-300">Current Logo Preview</p>
                 </div>
               </div>
             </section>
