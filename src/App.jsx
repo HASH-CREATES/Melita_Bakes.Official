@@ -46,6 +46,7 @@ function App() {
       }
     };
     loadData();
+    // eslint-disable-next-line
   }, [isAdminLoggedIn]);
 
   // Load site settings (logo)
@@ -433,20 +434,21 @@ function App() {
         </div>
       </header>
 
-      {/* Logo Header - Now with extra large 320px × 320px logo */}
+      {/* Logo Header - Now with extra large 420px × 420px logo */}
       <div className="logo-holder w-full flex flex-col items-center justify-center py-8" style={{ backgroundColor: '#fc94ad' }}>
         {siteSettings.logo_url ? (
           <img
             src={siteSettings.logo_url}
             alt="Melita Bakes"
-            className="w-80 h-80 object-contain mb-4 rounded-full border-4 border-white shadow-lg"
+            style={{ width: "420px", height: "420px" }}
+            className="object-contain mb-4 rounded-full border-4 border-white shadow-lg"
           />
         ) : (
-          <div className="w-80 h-80 bg-white flex items-center justify-center rounded-full border-4 border-white shadow-lg mb-4">
+          <div style={{ width: "420px", height: "420px" }} className="bg-white flex items-center justify-center rounded-full border-4 border-white shadow-lg mb-4">
             <span className="text-gray-500 text-xl">No Logo</span>
           </div>
         )}
-        <h1 className="text-4xl font-bold text-white">Melita Bakes</h1>
+        <h1 className="text-5xl font-bold text-white">Melita Bakes</h1>
       </div>
 
       {/* Main content */}
@@ -594,12 +596,13 @@ function App() {
                   </button>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-64 h-64 rounded-full border-4 border-white shadow-md flex items-center justify-center" style={{ backgroundColor: '#fc94ad' }}>
+                  <div style={{ width: "420px", height: "420px" }} className="rounded-full border-4 border-white shadow-md flex items-center justify-center"  >
                     {siteSettings.logo_url ? (
                       <img
                         src={siteSettings.logo_url}
                         alt="Current Logo"
-                        className="w-full h-full object-contain rounded-full"
+                        style={{ width: "420px", height: "420px" }}
+                        className="object-contain rounded-full"
                       />
                     ) : (
                       <span className="text-gray-500">No Logo</span>
