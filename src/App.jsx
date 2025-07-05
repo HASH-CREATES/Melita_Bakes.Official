@@ -102,66 +102,24 @@ function App() {
   };
 
   // Load cakes
-const loadCakes = async () => {
-  const { data, error } = await supabase
-    .from('cakes')
-    .select('*')
-    .order('created_at', { ascending: false });
-  if (error) console.error(error);
-  else setCakes(data || []);
-};
-
-// Add new cake
-const addCake = async () => {
-  if (!cakeImageFile) {
-    alert('Please upload an image for the cake');
-    return;
-  }
-
-  try {
-    // Upload image
-    const fileExt = cakeImageFile.name.split('.').pop();
-    const fileName = `${Date.now()}.${fileExt}`;
-    const filePath = `public/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('cakes-images')
-      .upload(filePath, cakeImageFile);
-    if (uploadError) throw uploadError;
-
-    // Get public URL (fixed)
-    const { publicUrl } = supabase
-      .storage
-      .from('cakes-images')
-      .getPublicUrl(filePath).data;
-
-    // Insert cake record
-    const { error } = await supabase
+  const loadCakes = async () => {
+    const { data, error } = await supabase
       .from('cakes')
-      .insert([{
-        ...newCake,
-        price: parseFloat(newCake.price),
-        image_url: publicUrl
-      }]);
-    if (error) throw error;
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) console.error(error);
+    else setCakes(data || []);
+  };
 
-    // Reset form
-    setNewCake({ name: '', price: '', description: '', image_url: '' });
-    setCakeImageFile(null);
-    loadCakes();
-  } catch (err) {
-    console.error('Error adding cake:', err);
-    alert('Error adding cake. See console for details.');
-  }
-};
+  // Add new cake
+  const addCake = async () => {
+    if (!cakeImageFile) {
+      alert('Please upload an image for the cake');
+      return;
+    }
 
-// Edit cake
-const editCake = async () => {
-  try {
-    let imageUrl = newCake.image_url;
-
-    if (cakeImageFile) {
-      // Upload new image
+    try {
+      // Upload image
       const fileExt = cakeImageFile.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `public/${fileName}`;
@@ -171,50 +129,91 @@ const editCake = async () => {
         .upload(filePath, cakeImageFile);
       if (uploadError) throw uploadError;
 
-      // Get new public URL (fixed)
+      // Get public URL (fixed)
       const { publicUrl } = supabase
         .storage
         .from('cakes-images')
         .getPublicUrl(filePath).data;
 
-      imageUrl = publicUrl;
+      // Insert cake record
+      const { error } = await supabase
+        .from('cakes')
+        .insert([{
+          ...newCake,
+          price: parseFloat(newCake.price),
+          image_url: publicUrl
+        }]);
+      if (error) throw error;
+
+      // Reset form
+      setNewCake({ name: '', price: '', description: '', image_url: '' });
+      setCakeImageFile(null);
+      loadCakes();
+    } catch (err) {
+      console.error('Error adding cake:', err);
+      alert('Error adding cake. See console for details.');
     }
+  };
 
-    // Update cake record
-    const { error } = await supabase
-      .from('cakes')
-      .update({
-        ...newCake,
-        price: parseFloat(newCake.price),
-        image_url: imageUrl
-      })
-      .eq('id', editingCakeId);
-    if (error) throw error;
+  // Edit cake
+  const editCake = async () => {
+    try {
+      let imageUrl = newCake.image_url;
 
-    // Reset form
-    setEditingCakeId(null);
-    setNewCake({ name: '', price: '', description: '', image_url: '' });
-    setCakeImageFile(null);
-    loadCakes();
-  } catch (err) {
-    console.error('Error updating cake:', err);
-    alert('Error updating cake. See console for details.');
-  }
-};
+      if (cakeImageFile) {
+        // Upload new image
+        const fileExt = cakeImageFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `public/${fileName}`;
 
-// Delete cake
-const deleteCake = async (id) => {
-  if (!window.confirm('Are you sure you want to delete this cake?')) return;
-  try {
-    const { error } = await supabase.from('cakes').delete().eq('id', id);
-    if (error) throw error;
-    loadCakes();
-  } catch (err) {
-    console.error('Error deleting cake:', err);
-    alert('Error deleting cake. See console for details.');
-  }
-};
+        const { error: uploadError } = await supabase.storage
+          .from('cakes-images')
+          .upload(filePath, cakeImageFile);
+        if (uploadError) throw uploadError;
 
+        // Get new public URL (fixed)
+        const { publicUrl } = supabase
+          .storage
+          .from('cakes-images')
+          .getPublicUrl(filePath).data;
+
+        imageUrl = publicUrl;
+      }
+
+      // Update cake record
+      const { error } = await supabase
+        .from('cakes')
+        .update({
+          ...newCake,
+          price: parseFloat(newCake.price),
+          image_url: imageUrl
+        })
+        .eq('id', editingCakeId);
+      if (error) throw error;
+
+      // Reset form
+      setEditingCakeId(null);
+      setNewCake({ name: '', price: '', description: '', image_url: '' });
+      setCakeImageFile(null);
+      loadCakes();
+    } catch (err) {
+      console.error('Error updating cake:', err);
+      alert('Error updating cake. See console for details.');
+    }
+  };
+
+  // Delete cake
+  const deleteCake = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this cake?')) return;
+    try {
+      const { error } = await supabase.from('cakes').delete().eq('id', id);
+      if (error) throw error;
+      loadCakes();
+    } catch (err) {
+      console.error('Error deleting cake:', err);
+      alert('Error deleting cake. See console for details.');
+    }
+  };
 
   // Load business hours
   const loadHours = async () => {
@@ -443,7 +442,7 @@ const deleteCake = async (id) => {
         </div>
       </header>
 
-      {/* Logo Header - Now with extra large 420px × 420px logo */}
+      {/* Logo Header */}
       <div className="logo-holder w-full flex flex-col items-center justify-center py-8" style={{ backgroundColor: '#fc94ad' }}>
         {siteSettings.logo_url ? (
           <img
@@ -678,12 +677,16 @@ const deleteCake = async (id) => {
                         <label className="block text-gray-300 text-sm font-bold mb-2" htmlFor="image">
                           {editingCakeId ? 'New Image (optional)' : 'Image (required)'}
                         </label>
-                        <input 
-                          type="file" 
-                          id="image" 
-                          accept="image/*" 
-                          onChange={(e) => setCakeImageFile(e.target.files?.[0])} 
-                          className="w-full px-3 py-2 border border-gray-600 bg-neutral-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500" 
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              setCakeImageFile(e.target.files[0]);
+                              e.target.value = null; // allows same file selection again
+                            }
+                          }}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-pink-500 file:text-white hover:file:bg-pink-600"
                           required={!editingCakeId}
                         />
                         {editingCakeId && newCake.image_url && (
