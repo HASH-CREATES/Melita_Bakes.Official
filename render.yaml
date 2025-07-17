@@ -1,13 +1,13 @@
 services:
   - name: melita-bakes
-    type: combined
+    type: web
     env: production
-    build_command: npm install && npm run build
-    start_command: npx serve -s dist
-    env_vars:
+    buildCommand: npm install && npm run build
+    startCommand: npx serve -s dist
+    envVars:
       - key: VITE_SUPABASE_URL
         value: your-supabase-url
-      - key: VITE_SUPABASE_KEY
+      - key: VITE_SUPABASE_ANON_KEY
         value: your-supabase-key
       - key: ADMIN_EMAIL
         value: admin@example.com
